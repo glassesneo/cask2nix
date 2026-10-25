@@ -1,10 +1,10 @@
-# Test fixture and usage example: binds brew-nix to brew-api data and to the
+# Test fixture and usage example: binds cask2nix to brew-api data and to the
 # tap layout in ./fixtures/taps.
 # Run from the repository root, e.g. `nix build ./tests#brewCasks.rectangle`.
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    brew-nix = {
+    cask2nix = {
       url = "path:..";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -18,7 +18,7 @@
     {
       self,
       nixpkgs,
-      brew-nix,
+      cask2nix,
       brew-api,
       ...
     }:
@@ -30,11 +30,11 @@
     in
     {
       legacyPackages = forAllSystems (pkgs: {
-        brewCasks = brew-nix.lib.mkCasks {
+        brewCasks = cask2nix.lib.mkCasks {
           inherit pkgs;
           source = brew-api;
         };
-        brewTaps = brew-nix.lib.mkTaps {
+        brewTaps = cask2nix.lib.mkTaps {
           inherit pkgs;
           source = ./fixtures/taps;
         };

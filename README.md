@@ -1,10 +1,8 @@
-# brew-nix
+# cask2nix
 
-[![test](https://github.com/glassesneo/brew-nix/actions/workflows/test.yml/badge.svg)](https://github.com/glassesneo/brew-nix/actions/workflows/test.yml)
+[![test](https://github.com/glassesneo/cask2nix/actions/workflows/test.yml/badge.svg)](https://github.com/glassesneo/cask2nix/actions/workflows/test.yml)
 
-An experimental nix expression to package macOS [Homebrew Casks](https://brew.sh/) automatically, including casks from third-party taps.
-
-This is a fork of [BatteredBunny/brew-nix](https://github.com/BatteredBunny/brew-nix).
+An experimental Nix library that packages macOS [Homebrew Casks](https://brew.sh/) from their JSON data, including casks from third-party taps.
 
 ## Benefits over nix-darwin's homebrew module
 
@@ -26,14 +24,14 @@ This is a fork of [BatteredBunny/brew-nix](https://github.com/BatteredBunny/brew
 
 # Design
 
-brew-nix is only the mechanism; the cask data comes from elsewhere.
+cask2nix is only the mechanism; the cask data comes from elsewhere.
 
-- `brew-nix.lib.mkCasks { pkgs, source }` turns one data source into an attrset of cask packages. `source` is a directory containing a `cask.json`: a JSON array of casks as printed by `brew info --json=v2 --variations`.
-- `brew-nix.lib.mkTaps { pkgs, source }` does the same for many taps at once. `source` is a directory laid out as `<user>/<repo>/cask.json`, and the result is an attrset `<user>.<repo>.<cask>`.
+- `cask2nix.lib.mkCasks { pkgs, source }` turns one data source into an attrset of cask packages. `source` is a directory containing a `cask.json`: a JSON array of casks as printed by `brew info --json=v2 --variations`.
+- `cask2nix.lib.mkTaps { pkgs, source }` does the same for many taps at once. `source` is a directory laid out as `<user>/<repo>/cask.json`, and the result is an attrset `<user>.<repo>.<cask>`.
 - [`brew-api`](https://github.com/BatteredBunny/brew-api) provides `cask.json` for the official `homebrew/cask` tap.
 - [`brew-taps-api`](https://github.com/glassesneo/brew-taps-api) generates the `mkTaps` layout for third-party taps.
 
-brew-nix pins no data and provides no overlay. You bind data to it once in your own flake and decide where the packages live.
+cask2nix pins no data and provides no overlay. You bind data to it once in your own flake and decide where the packages live.
 
 # Setup
 
@@ -42,8 +40,8 @@ brew-nix pins no data and provides no overlay. You bind data to it once in your 
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    brew-nix = {
-      url = "github:glassesneo/brew-nix";
+    cask2nix = {
+      url = "github:glassesneo/cask2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     brew-api = {
@@ -53,14 +51,14 @@ brew-nix pins no data and provides no overlay. You bind data to it once in your 
   };
 
   outputs =
-    { self, nixpkgs, brew-nix, brew-api, ... }:
+    { self, nixpkgs, cask2nix, brew-api, ... }:
     let
       system = "aarch64-darwin";
       pkgs = nixpkgs.legacyPackages.${system};
     in
     {
       legacyPackages.${system} = {
-        brewCasks = brew-nix.lib.mkCasks {
+        brewCasks = cask2nix.lib.mkCasks {
           inherit pkgs;
           source = brew-api;
         };
@@ -101,8 +99,8 @@ inputs.brew-taps-api = {
 };
 
 legacyPackages.${system} = {
-  brewCasks = brew-nix.lib.mkCasks { inherit pkgs; source = brew-api; };
-  brewTaps = brew-nix.lib.mkTaps { inherit pkgs; source = "${brew-taps-api}/taps"; };
+  brewCasks = cask2nix.lib.mkCasks { inherit pkgs; source = brew-api; };
+  brewTaps = cask2nix.lib.mkTaps { inherit pkgs; source = "${brew-taps-api}/taps"; };
 };
 ```
 
@@ -110,7 +108,7 @@ legacyPackages.${system} = {
 brewTaps.nikitabobko.tap.aerospace
 ```
 
-brew-nix never merges sources, so tap casks cannot shadow `homebrew/cask` ones unless you merge them yourself.
+cask2nix never merges sources, so tap casks cannot shadow `homebrew/cask` ones unless you merge them yourself.
 
 # Overriding
 
@@ -149,9 +147,13 @@ brewCasks.visual-studio-code.override { variation = "sequoia"; }
 
 # Development
 
-[`tests/flake.nix`](tests/flake.nix) binds brew-nix to brew-api and to the tap fixtures in [`tests/fixtures/taps`](tests/fixtures/taps), and serves as the test fixture.
+[`tests/flake.nix`](tests/flake.nix) binds cask2nix to brew-api and to the tap fixtures in [`tests/fixtures/taps`](tests/fixtures/taps), and serves as the test fixture.
 
 ```bash
 nix flake check ./tests # evaluate every cask
 ./test.py               # build representative casks
 ```
+
+# Acknowledgements
+
+cask2nix started as a fork of [BatteredBunny/brew-nix](https://github.com/BatteredBunny/brew-nix), and the way it turns casks into derivations comes from there. Many thanks to BatteredBunny and the brew-nix contributors, and to [brew-api](https://github.com/BatteredBunny/brew-api), which keeps the official cask data available to Nix.

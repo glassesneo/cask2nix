@@ -16,7 +16,7 @@
         "type": "github"
       }
     },
-    "brew-nix": {
+    "cask2nix": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -51,7 +51,7 @@
     "root": {
       "inputs": {
         "brew-api": "brew-api",
-        "brew-nix": "brew-nix",
+        "cask2nix": "cask2nix",
         "nixpkgs": "nixpkgs"
       }
     }
