@@ -151,7 +151,7 @@ brewCasks.visual-studio-code.override { variation = "sequoia"; }
 
 ```bash
 nix flake check ./tests # evaluate every cask
-./test.py               # build representative casks
+./test.sh               # build representative casks
 ```
 
 # Acknowledgements

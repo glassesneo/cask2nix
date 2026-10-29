@@ -39,9 +39,6 @@
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
             wget
-            python3
-            ruff
-            ty
           ];
         };
       });

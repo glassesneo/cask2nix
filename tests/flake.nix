@@ -29,16 +29,24 @@
       forAllSystems = f: lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
     in
     {
-      legacyPackages = forAllSystems (pkgs: {
-        brewCasks = cask2nix.lib.mkCasks {
-          inherit pkgs;
-          source = brew-api;
-        };
-        brewTaps = cask2nix.lib.mkTaps {
-          inherit pkgs;
-          source = ./fixtures/taps;
-        };
-      });
+      legacyPackages = forAllSystems (
+        pkgs:
+        let
+          brewCasks = cask2nix.lib.mkCasks {
+            inherit pkgs;
+            source = brew-api;
+          };
+        in
+        {
+          inherit brewCasks;
+          brewTaps = cask2nix.lib.mkTaps {
+            inherit pkgs;
+            source = ./fixtures/taps;
+          };
+          # Builds representative casks; run with ../test.sh.
+          caskTests = import ./cask-tests.nix { inherit pkgs brewCasks; };
+        }
+      );
 
       # Evaluate every cask without building them.
       checks = forAllSystems (pkgs: {
