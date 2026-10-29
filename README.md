@@ -4,6 +4,8 @@
 
 An experimental Nix library that packages macOS [Homebrew Casks](https://brew.sh/) from their JSON data, including casks from third-party taps.
 
+> cask2nix is a fork of [BatteredBunny/brew-nix](https://github.com/BatteredBunny/brew-nix), reworked into a data-agnostic library with third-party tap support. See [Acknowledgements](#acknowledgements).
+
 ## Benefits over nix-darwin's homebrew module
 
 1. No homebrew installation needed; packages are fully managed by nix.
