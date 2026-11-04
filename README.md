@@ -35,6 +35,12 @@ cask2nix is only the mechanism; the cask data comes from elsewhere.
 
 cask2nix pins no data and provides no overlay. You bind data to it once in your own flake and decide where the packages live.
 
+Both functions are also plain files taking the same arguments, `casks.nix` and `taps.nix`, so you can import them from a source fetched without flakes, such as an npins pin, and they use only your `pkgs`:
+
+```nix
+import "${cask2nix}/taps.nix" { inherit pkgs; source = "${brew-taps-api}/taps"; }
+```
+
 # Setup
 
 ```nix
